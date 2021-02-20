@@ -47,7 +47,6 @@ suspend fun main() = Korge(width = 1024, height = 1024, bgcolor = Colors["#2b2b2
 	}
 
 	suspend fun cellClicked(row: Int, col: Int) {
-		println("SELECTED CELL: $selectedCell")
 		if (selectedCell == null) {
 			setSelectedCell(row, col)
 			return
@@ -55,20 +54,9 @@ suspend fun main() = Korge(width = 1024, height = 1024, bgcolor = Colors["#2b2b2
 		if (selectedCell!!.row == row && selectedCell!!.col == col) {
 			return
 		}
-		// updateSelectedCell(row, col)
-
 		b.movePiece(selectedCell!!.row, selectedCell!!.col, row, col)
 		removeChild(selectedCell!!.selectedCellView)
 		selectedCell = null
-
-
-
-
-		// b.movePiece(selectedCell!!.row, selectedCell!!.col, row, col)
-
-
-
-
 	}
 
 	fun renderClickCells() {
@@ -108,11 +96,6 @@ suspend fun main() = Korge(width = 1024, height = 1024, bgcolor = Colors["#2b2b2
 			}
 		}
 	}
-
-
-
-
-
 
 	renderBoard()
 	renderPieces()
