@@ -1,9 +1,14 @@
 package Chess
 
+import com.soywiz.klock.seconds
+import com.soywiz.korge.view.tween.moveTo
 import com.soywiz.korio.util.isNumeric
 import com.soywiz.korma.geom.Point
+import com.soywiz.korma.interpolation.Easing
 
 class Board(size: Double, cellSize: Double, topLeft: Point) {
+    val topLeft = topLeft
+    val cellSize = cellSize
     var cells = List<Cell>(64) { Cell(Point(topLeft.x + ((it % 8) * cellSize), topLeft.y + ((it / 8) * cellSize)), it / 8, it % 8)}
 
 
@@ -23,8 +28,24 @@ class Board(size: Double, cellSize: Double, topLeft: Point) {
         return cells[col + row * 8]
     }
 
-    fun setCell(row: Int, col: Int, piece: Piece) {
-        getCell(row, col).piece = piece
+    suspend fun movePiece(fromRow: Int, fromCol: Int, toRow: Int, toCol: Int) {
+        print(" $fromRow, $fromCol")
+        print(" $toRow, $toCol")
+        val fromCell = getCell(fromRow, fromCol)
+        val toCell = getCell(toRow, toCol)
+        if (fromCell.piece is None){
+            return
+        }
+        if(toCell.piece !is None) {
+            toCell.pieceIllustration!!.removeFromParent()
+        }
+        toCell.piece = fromCell.piece
+        fromCell.piece = None()
+        toCell.pieceIllustration = fromCell.pieceIllustration
+        fromCell.pieceIllustration = null
+
+
+        toCell.pieceIllustration!!.moveTo(topLeft.x + toCell.col * cellSize, topLeft.y + toCell.row * cellSize, 0.1.seconds, easing = Easing.LINEAR)
     }
 
     private fun isUpperCase(char: Char): Boolean {
@@ -57,7 +78,7 @@ class Board(size: Double, cellSize: Double, topLeft: Point) {
                     colIndex += char.toInt()
                     continue
                 }
-                this.setCell(row, colIndex, getPieceFromFenChar(char))
+                this.getCell(row, colIndex).piece = getPieceFromFenChar(char)
                 colIndex++
             }
 
