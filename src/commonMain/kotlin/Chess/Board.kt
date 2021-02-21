@@ -11,6 +11,8 @@ class Board(size: Double, cellSize: Double, topLeft: Point) {
     val cellSize = cellSize
     var cells = List<Cell>(64) { Cell(Point(topLeft.x + ((it % 8) * cellSize), topLeft.y + ((it / 8) * cellSize)), it / 8, it % 8)}
 
+    var whiteToPlay = true
+
 
     fun print() {
         for (row in 0 until 8) {
@@ -43,9 +45,8 @@ class Board(size: Double, cellSize: Double, topLeft: Point) {
         fromCell.piece = None()
         toCell.pieceIllustration = fromCell.pieceIllustration
         fromCell.pieceIllustration = null
-
-
         toCell.pieceIllustration!!.moveTo(topLeft.x + toCell.col * cellSize, topLeft.y + toCell.row * cellSize, 0.1.seconds, easing = Easing.LINEAR)
+        whiteToPlay = !whiteToPlay
     }
 
     private fun isUpperCase(char: Char): Boolean {

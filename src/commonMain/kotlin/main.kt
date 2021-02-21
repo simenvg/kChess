@@ -17,6 +17,7 @@ suspend fun main() = Korge(width = 1024, height = 1024, bgcolor = Colors["#2b2b2
 
 
 	var selectedCell: BoardGraphicsState? = null
+	var playerToPlayText: Text? = null
 
 	val board = BooleanArray(64) { false }
 	board[5] = true
@@ -46,6 +47,20 @@ suspend fun main() = Korge(width = 1024, height = 1024, bgcolor = Colors["#2b2b2
 		selectedCell = BoardGraphicsState(newSelectedCell, row, col)
 	}
 
+
+	fun renderPlayerToPlay() {
+		if (playerToPlayText != null) {
+			removeChild(playerToPlayText)
+		}
+		var t = "White to play"
+		if (!b.whiteToPlay) t = "Black to play"
+		val text = Text(t, 30.0, white)
+		text.x = boardSize / 2 + 100
+		text.y = 100.0
+		playerToPlayText = text
+		addChild(text)
+	}
+
 	suspend fun cellClicked(row: Int, col: Int) {
 		if (selectedCell == null) {
 			setSelectedCell(row, col)
@@ -57,6 +72,7 @@ suspend fun main() = Korge(width = 1024, height = 1024, bgcolor = Colors["#2b2b2
 		b.movePiece(selectedCell!!.row, selectedCell!!.col, row, col)
 		removeChild(selectedCell!!.selectedCellView)
 		selectedCell = null
+		renderPlayerToPlay()
 	}
 
 	fun renderClickCells() {
@@ -97,9 +113,12 @@ suspend fun main() = Korge(width = 1024, height = 1024, bgcolor = Colors["#2b2b2
 		}
 	}
 
+
+
 	renderBoard()
 	renderPieces()
 	renderClickCells()
+	renderPlayerToPlay()
 
 
 
