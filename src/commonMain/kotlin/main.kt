@@ -1,7 +1,6 @@
 import Chess.Board
-import Chess.None
+import Chess.Color
 import com.soywiz.korge.*
-import com.soywiz.korge.input.onClick
 import com.soywiz.korge.input.onDown
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
@@ -63,12 +62,22 @@ suspend fun main() = Korge(width = 1024, height = 1024, bgcolor = Colors["#2b2b2
 
 	suspend fun cellClicked(row: Int, col: Int) {
 		if (selectedCell == null) {
-			setSelectedCell(row, col)
+			if (b.whiteToPlay && b.getCell(row, col).piece.color == Color.WHITE) {
+				setSelectedCell(row, col)
+				return
+			}
+			if (!b.whiteToPlay && b.getCell(row, col).piece.color == Color.BLACK) {
+				setSelectedCell(row, col)
+				return
+			}
 			return
 		}
 		if (selectedCell!!.row == row && selectedCell!!.col == col) {
 			return
 		}
+
+
+
 		b.movePiece(selectedCell!!.row, selectedCell!!.col, row, col)
 		removeChild(selectedCell!!.selectedCellView)
 		selectedCell = null
