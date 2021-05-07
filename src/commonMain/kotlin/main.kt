@@ -63,10 +63,12 @@ suspend fun main() = Korge(width = 1024, height = 1024, bgcolor = Colors["#2b2b2
 	suspend fun cellClicked(row: Int, col: Int) {
 		if (selectedCell == null) {
 			if (b.whiteToPlay && b.getCell(row, col).piece.color == Color.WHITE) {
+				b.generatePossibleMoves(row, col)
 				setSelectedCell(row, col)
 				return
 			}
 			if (!b.whiteToPlay && b.getCell(row, col).piece.color == Color.BLACK) {
+				b.generatePossibleMoves(row, col)
 				setSelectedCell(row, col)
 				return
 			}

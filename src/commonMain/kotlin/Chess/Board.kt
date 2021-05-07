@@ -9,7 +9,7 @@ import com.soywiz.korma.interpolation.Easing
 class Board(size: Double, cellSize: Double, topLeft: Point) {
     val topLeft = topLeft
     val cellSize = cellSize
-    var cells = List<Cell>(64) { Cell(it / 8, it % 8)}
+    var cells = List<Cell>(64) { Cell(it / 8, it % 8) }
 
     var whiteToPlay = true
 
@@ -18,7 +18,8 @@ class Board(size: Double, cellSize: Double, topLeft: Point) {
         for (row in 0 until 8) {
             for (col in 0 until 8) {
                 val piece = getCell(row, col).piece
-                val notation = if (piece.color == Color.WHITE) piece.getPieceChar() else piece.getPieceChar().toLowerCase()
+                val notation =
+                    if (piece.color == Color.WHITE) piece.getPieceChar() else piece.getPieceChar().toLowerCase()
                 print(" $notation ")
             }
             println()
@@ -33,53 +34,91 @@ class Board(size: Double, cellSize: Double, topLeft: Point) {
     fun generatePossibleMoves(row: Int, col: Int): List<Cell> {
         val cell = getCell(row, col)
         return when (cell.piece) {
-            is Queen -> generateVerticalMoves(cell)
-            is King -> generateVerticalMoves(cell)
-            is Rook -> generateVerticalMoves(cell)
-            is Knight -> generateVerticalMoves(cell)
-            is Bishop -> generateVerticalMoves(cell)
-            is Pawn -> generateVerticalMoves(cell)
+            is Queen -> getSlidingMoves(cell, true, true)
+            is King -> getSlidingMoves(cell, true, true)
+            is Rook -> getSlidingMoves(cell, false, true)
+            is Knight -> getSlidingMoves(cell, true, true)
+            is Bishop -> getSlidingMoves(cell, true, false)
+            is Pawn -> getSlidingMoves(cell, true, true)
             else -> listOf()
         }
     }
 
-    fun generateVerticalMoves(cell: Cell): List<Cell> {
-        val start = if (whiteToPlay) cell.col - 1 else cell.col + 1;
-        val end = if (whiteToPlay) 0 else 7;
-        println("Legal moves from $cell")
+    fun isValidMove(current: Cell, direction: Direction): Boolean {
+        if (current.col == 0 && direction.isWestward()) {
+            return false
+        } else if (current.col == 7 && direction.isEastward()) {
+            return false
+        } else if (current.row == 0 && direction.isNorthward()) {
+            return false
+        } else if (current.row == 7 && direction.isSouthward()) {
+            return false
+        }
+        return true
+    }
 
-        var result = mutableListOf<Cell>();
-
-        for (i in start..end) {
-            val c = getCell(i, cell.col)
-            if (c.piece is None) {
-                println(c)
-                result.add(c)
-            }
-            else {
-                // todo: må sjekke om vi kan ta denne brikken!
-                break
-            }
+    fun getSlidingMoves(originCell: Cell, diagonal: Boolean, orthogonal: Boolean): List<Cell> {
+        val res = mutableListOf<Cell>()
+        if (diagonal) {
+            res += getMovesInDirection(originCell, Direction.NORTH_WEST())
+            res += getMovesInDirection(originCell, Direction.NORTH_EAST())
+            res += getMovesInDirection(originCell, Direction.SOUTH_WEST())
+            res += getMovesInDirection(originCell, Direction.SOUTH_EAST())
         }
 
+        if (orthogonal) {
+            res += getMovesInDirection(originCell, Direction.WEST())
+            res += getMovesInDirection(originCell, Direction.EAST())
+            res += getMovesInDirection(originCell, Direction.SOUTH())
+            res += getMovesInDirection(originCell, Direction.NORTH())
+        }
+        return res
+    }
+
+    fun getMovesInDirection(originCell: Cell, direction: Direction): List<Cell> {
+
+        var result = mutableListOf<Cell>()
+        val playerColor = originCell.piece.color
+        var current = originCell
+
+        while (isValidMove(current, direction)) {
+            current = step(current, direction)
+            when (current.piece.color){
+                Color.NONE -> result.add(current)
+                playerColor -> break
+                else -> {
+                    result.add(current)
+                    break
+                }
+            }
+        }
         return result
+    }
+
+    fun step(originCell: Cell, direction: Direction): Cell {
+        return cells[originCell.getCoordinate() + direction.inc]
     }
 
     suspend fun movePiece(fromRow: Int, fromCol: Int, toRow: Int, toCol: Int) {
         println(generatePossibleMoves(fromRow, fromCol))
         val fromCell = getCell(fromRow, fromCol)
         val toCell = getCell(toRow, toCol)
-        if (fromCell.piece is None){
+        if (fromCell.piece is None) {
             return
         }
-        if(toCell.piece !is None) {
+        if (toCell.piece !is None) {
             toCell.pieceIllustration!!.removeFromParent()
         }
         toCell.piece = fromCell.piece
         fromCell.piece = None()
         toCell.pieceIllustration = fromCell.pieceIllustration
         fromCell.pieceIllustration = null
-        toCell.pieceIllustration!!.moveTo(topLeft.x + toCell.col * cellSize, topLeft.y + toCell.row * cellSize, 0.1.seconds, easing = Easing.LINEAR)
+        toCell.pieceIllustration!!.moveTo(
+            topLeft.x + toCell.col * cellSize,
+            topLeft.y + toCell.row * cellSize,
+            0.1.seconds,
+            easing = Easing.LINEAR
+        )
         whiteToPlay = !whiteToPlay
     }
 
