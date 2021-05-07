@@ -116,7 +116,7 @@ suspend fun main() = Korge(width = 1024, height = 1024, bgcolor = Colors["#2b2b2
 			val filepath = cell.piece.getPiecePngFileName()
 			if (filepath != null) {
 				cell.pieceIllustration = image(resourcesVfs[filepath].readBitmap()) {
-					position(cell.coordinates)
+					position(Point(b.topLeft.x + cell.col * cellSize, b.topLeft.y + cell.row * cellSize))
 				}
 			}
 		}

@@ -9,7 +9,7 @@ import com.soywiz.korma.interpolation.Easing
 class Board(size: Double, cellSize: Double, topLeft: Point) {
     val topLeft = topLeft
     val cellSize = cellSize
-    var cells = List<Cell>(64) { Cell(Point(topLeft.x + ((it % 8) * cellSize), topLeft.y + ((it / 8) * cellSize)), it / 8, it % 8)}
+    var cells = List<Cell>(64) { Cell(it / 8, it % 8)}
 
     var whiteToPlay = true
 
@@ -30,9 +30,43 @@ class Board(size: Double, cellSize: Double, topLeft: Point) {
         return cells[col + row * 8]
     }
 
+    fun generatePossibleMoves(row: Int, col: Int): List<Cell> {
+        val cell = getCell(row, col)
+        return when (cell.piece) {
+            is Queen -> generateVerticalMoves(cell)
+            is King -> generateVerticalMoves(cell)
+            is Rook -> generateVerticalMoves(cell)
+            is Knight -> generateVerticalMoves(cell)
+            is Bishop -> generateVerticalMoves(cell)
+            is Pawn -> generateVerticalMoves(cell)
+            else -> listOf()
+        }
+    }
+
+    fun generateVerticalMoves(cell: Cell): List<Cell> {
+        val start = if (whiteToPlay) cell.col - 1 else cell.col + 1;
+        val end = if (whiteToPlay) 0 else 7;
+        println("Legal moves from $cell")
+
+        var result = mutableListOf<Cell>();
+
+        for (i in start..end) {
+            val c = getCell(i, cell.col)
+            if (c.piece is None) {
+                println(c)
+                result.add(c)
+            }
+            else {
+                // todo: må sjekke om vi kan ta denne brikken!
+                break
+            }
+        }
+
+        return result
+    }
+
     suspend fun movePiece(fromRow: Int, fromCol: Int, toRow: Int, toCol: Int) {
-        print(" $fromRow, $fromCol")
-        print(" $toRow, $toCol")
+        println(generatePossibleMoves(fromRow, fromCol))
         val fromCell = getCell(fromRow, fromCol)
         val toCell = getCell(toRow, toCol)
         if (fromCell.piece is None){
